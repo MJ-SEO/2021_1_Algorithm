@@ -5,13 +5,13 @@
 
 /* Reference list
    (1). 강의 slice chapter 16 - Knapsack Problem
-   (2). Web Page: 백준 12865번 문제 평범한 배낭 https://www.acmicpc.net/problem/12865
-   (3). C++ 랜덤함수 난수생성기 Blog: https://arer.tistory.com/10
-   (4). B&B algorithm 참고 Web Page: https://www.geeksforgeeks.org/implementation-of-0-1-knapsack-using-branch-and-bound/
-   (5). C++ 출력형태 정리 Blog: https://blog.naver.com/PostView.nhn?blogId=lyw94k&logNo=220848917877
-   (6). C++ vector 사용법 Web Page: https://www.geeksforgeeks.org/vector-erase-and-clear-in-cpp/
-   (7). C++ STL(priortiry queue) 사용법Blog: https://developingbear.tistory.com/58
-   (8). C++ 파일 입출력 Blog:  https://mintyu.github.io/cpp12/
+   (2). 백준 12865번 문제 평범한 배낭 https://www.acmicpc.net/problem/12865
+   (3). C++ 랜덤함수 난수생성기 https://arer.tistory.com/10
+   (4). B&B algorithm 참고 https://www.geeksforgeeks.org/implementation-of-0-1-knapsack-using-branch-and-bound/
+   (5). C++ 출력형태 정리 https://blog.naver.com/PostView.nhn?blogId=lyw94k&logNo=220848917877
+   (6). C++ vector 사용법 https://www.geeksforgeeks.org/vector-erase-and-clear-in-cpp/
+   (7). C++ STL(priortiry queue) 사용법https://developingbear.tistory.com/58
+   (8). C++ 파일 입출력 https://mintyu.github.io/cpp12/
 */
 
 // Comment - My program works for all of algorithms(Greedy, DP, B&B)
@@ -30,8 +30,8 @@
 using namespace std;
 
 int n_items[8] = {100, 1000, 2000, 4000, 6000, 8000, 10000, 12000}; 
-int result_value[8][3];
-double result_time[8][3];
+int result[8][6];  // 결과 출력을 위한 배열
+vector <pair<double, int>> result;
 vector <pair<int, int>> item_table;   // item의 정보를 저장하기 위한 vector
 
 bool cmp(pair<int, int> a, pair< int, int> b){				
@@ -39,9 +39,9 @@ bool cmp(pair<int, int> a, pair< int, int> b){
 }						// 배낭안의 item들을 정렬하기 위한 함수
 
 void show_result(){	// 결과를 출력하기 위한 함수
-	ofstream fout("output.txt");
-	cout << "		      Result(Processing time in miliseconds / Maximum benefit value)\n";
-	fout << "		      Result(Processing time in miliseconds / Maximum benefit value)\n";
+	ofstream fout("text.txt");
+	cout << "Result(Processing time in miliseconds / Maximum benefit value)\n";
+	fout << "Result(Processing time in miliseconds / Maximum benefit value)\n";
 	cout << "                               Greedy               DP                B&B\n";
 	fout << "                               Greedy               DP                B&B\n";
 	for(int i=0; i<8; i++){
@@ -56,19 +56,19 @@ void show_result(){	// 결과를 출력하기 위한 함수
 			fout << " ";
 		}
 		int flag = 0;
-		for(int j=0; j<3; j++){
+		for(int j=0; j<6; j++){
 			cout.setf(ios::left);
 			fout.setf(ios::left);
-			cout << setw(9) << result_time[i][j];
-i			fout << setw(9) << result_time[i][j];
+			cout << setw(9) << result[i][j];
+			fout << setw(9) << result[i][j];
+			if(j%2 == 0){
 			       	cout << "/";
-			       	fout << "/";
-			cout << setw(9) << result_value[i][j];
-			fout << setw(9) << result_value[i][j];
+				fout << "/";
+			}
 		}
-i		cout << "\n";
+		cout << "\n";
 		fout << "\n";
-i	}
+	}
 }
 
 void show_table(int items){	// item_table의 내용을 확인하기 위한 디버깅용  함수
@@ -96,7 +96,7 @@ double greedy(int num_items, int max_weight, int idx){	// Greedy algorithm
 		}
 	}	//	알고리즘 구현 부분, main함수에서 item정렬 후 greedy알고리즘 적용
 	
-	result_value[idx][0] = (double)optimal; 	
+	result[idx][1] = (double)optimal; 	
 	clock_t end = clock();	
 	return	(double)(end - start)/CLOCKS_PER_SEC * 1000;
 }
@@ -141,7 +141,7 @@ double DP(int num_items, int max_weight, int idx){	// Dynamic Progrmming
 	free(knap);
 
 //	cout << "DP result: " << knap[num_items][max_weight] << "\n";
-	result_value[idx][1] = (double)knap[num_items][max_weight];
+	result[idx][3] = (double)knap[num_items][max_weight];
 
 	clock_t end = clock();	
 	return (double)(end - start)/CLOCKS_PER_SEC * 1000;
@@ -226,7 +226,7 @@ double branch_bound(int num_items, int max_weight, int idx){	// Branch and Bound
 	}	// B&B 알고리즘, 강의 PPT 및 Reference(4)참조
 
 //	cout << "BB result: " << max_benefit << "\n";
-	result_value[idx][2] = (double)max_benefit;
+	result[idx][5] = (double)max_benefit;
 	
 	clock_t end = clock();
 	return (double)(end - start)/CLOCKS_PER_SEC * 1000;
@@ -244,14 +244,15 @@ int main(){
 			item_table.push_back({(rand()%100) + 1, (rand()%300) + 1});
 		}	// 위에서 선언한 vector table에 값 삽입 
 		
-		result_time[i][1] = DP(items, max_weight, i);
+//		result[i][2] = DP(items, max_weight, i);
 		sort(item_table.begin(), item_table.end(), cmp); // Greedy, B&B를 위한 sorting
 						   // 각 item의 value/weight를 기준으로 soring 
-		result_time[i][0] = greedy(items, max_weight, i);
-		result_time[i][2]= branch_bound(items, max_weight, i);
+		result[i][0] = greedy(items, max_weight, i);
+		result[i][4] = branch_bound(items, max_weight, i);
 
 		item_table.erase(item_table.begin(), item_table.end());
 	}
 	show_result();	
 	return 0;
 }
+
